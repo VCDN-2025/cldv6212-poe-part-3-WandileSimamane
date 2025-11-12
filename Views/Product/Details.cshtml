@@ -1,0 +1,36 @@
+﻿@model OrderSystem.Models.Product
+
+@{
+    ViewData["Title"] = "Product Details";
+}
+
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h4 class="mb-0"><i class="bi bi-box-seam"></i> Product Details</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3 fw-bold">@Html.DisplayNameFor(model => model.ProductName)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.ProductName)</dd>
+
+                <dt class="col-sm-3 fw-bold">@Html.DisplayNameFor(model => model.ProductDetails)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.ProductDetails)</dd>
+
+                <dt class="col-sm-3 fw-bold">@Html.DisplayNameFor(model => model.ProductImage)</dt>
+                <dd class="col-sm-9">
+                    <img src="@Model.ProductImage" alt="Product Image" class="img-thumbnail" style="max-width:300px; height:auto;" />
+                </dd>
+            </dl>
+
+            <div class="mt-3">
+                <a asp-action="Edit" asp-route-id="@Model?.RowKey" class="btn btn-warning">
+                    <i class="bi bi-pencil-square"></i> Edit
+                </a>
+                <a asp-action="Index" class="btn btn-secondary ms-2">
+                    <i class="bi bi-arrow-left-circle"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

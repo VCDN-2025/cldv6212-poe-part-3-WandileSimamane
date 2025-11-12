@@ -1,0 +1,54 @@
+﻿@model OrderSystem.Models.Product
+
+@{
+    ViewData["Title"] = "Edit Product";
+}
+
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-warning text-white">
+            <h4 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Product</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <input type="hidden" asp-for="RowKey" />
+                <input type="hidden" asp-for="PartitionKey" />
+
+                <div class="mb-3">
+                    <label asp-for="ProductName" class="form-label"></label>
+                    <input asp-for="ProductName" class="form-control" />
+                    <span asp-validation-for="ProductName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ProductDetails" class="form-label"></label>
+                    <input asp-for="ProductDetails" class="form-control" />
+                    <span asp-validation-for="ProductDetails" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label for="productImage" class="form-label">Product Image</label>
+                    <input type="file" name="productImage" id="productImage" class="form-control" />
+                    @if (!string.IsNullOrEmpty(Model.ProductImage))
+                    {
+                        <img src="@Model.ProductImage" alt="Current Image" class="img-thumbnail mt-2" style="max-height:150px;" />
+                    }
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Save Changes
+                </button>
+                <a asp-action="Index" class="btn btn-secondary ms-2">
+                    <i class="bi bi-arrow-left-circle"></i> Back to List
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
