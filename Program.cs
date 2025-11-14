@@ -1,5 +1,4 @@
-﻿
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
 using Azure.Storage.Files.Shares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -10,31 +9,11 @@ using OrderSystem.Services.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MVC
+
+
+
 builder.Services.AddControllersWithViews();
 
-// Session
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromHours(2);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
-string storageConnection = builder.Configuration.GetConnectionString("AzureTableStorage")
-
-?? builder.Configuration["AzureWebJobsStorage"]
-?? throw new InvalidOperationException("Azure storage connection string not found.");
-
-// Blob and File clients
-builder.Services.AddSingleton(new BlobServiceClient(storageConnection));
-builder.Services.AddSingleton(new ShareServiceClient(storageConnection));
-
-builder.Services.AddSingleton<TableService>();          
-builder.Services.AddScoped<CartService>();          
-builder.Services.AddSingleton<BlobService>();         
-builder.Services.AddSingleton<FileService>();       
-builder.Services.AddSingleton<QueueService>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -42,9 +21,26 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
-builder.Services.AddControllersWithViews();
+
+// Azure Storage Connection String
+string storageConnection = builder.Configuration.GetConnectionString("AzureTableStorage")
+    ?? builder.Configuration["AzureWebJobsStorage"]
+    ?? throw new InvalidOperationException("Azure storage connection string not found.");
+
+// Register Azure Clients
+builder.Services.AddSingleton(new BlobServiceClient(storageConnection));
+builder.Services.AddSingleton(new ShareServiceClient(storageConnection));
+
+// Register Application Services
+builder.Services.AddSingleton<TableService>();
+builder.Services.AddScoped<CartService>();
+builder.Services.AddSingleton<BlobService>();
+builder.Services.AddSingleton<FileService>();
+builder.Services.AddSingleton<QueueService>();
 
 var app = builder.Build();
+
+
 
 if (!app.Environment.IsDevelopment())
 {
@@ -57,13 +53,13 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+
 app.UseSession();
+
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
-app.UseSession();
 
 app.Run();

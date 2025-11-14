@@ -24,15 +24,22 @@ namespace OrderSystem.Controllers
 
         // POST: /Account/Register
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(Login model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
-            model.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            // Check if username exists
+            var existing = await _tableService.GetLoginByUsernameAsync(model.Username);
+            if (existing != null)
+            {
+                ModelState.AddModelError("Username", "Username already taken.");
+                return View(model);
+            }
 
-            await _tableService.AddLoginAsync(model); // this saves to Azure Table
+            model.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            model.RowKey = Guid.NewGuid().ToString();
+            await _tableService.AddLoginAsync(model);
 
             return RedirectToAction("Login");
         }
@@ -48,23 +55,25 @@ namespace OrderSystem.Controllers
         // POST: /Account/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(string username, string password)
+        public async Task<IActionResult> Login(Login model)
         {
-            var user = await _tableService.GetLoginByUsernameAsync(username);
-            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _tableService.GetLoginByUsernameAsync(model.Username);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
             {
                 ModelState.AddModelError("", "Invalid username or password.");
-                return View();
+                return View(model);
             }
 
-            // Set session
             HttpContext.Session.SetString("UserId", user.RowKey);
-            HttpContext.Session.SetString("Role", user.Role);
+            HttpContext.Session.SetString("Username", user.Username);
+            HttpContext.Session.SetString("UserRole", user.Role);
 
-            if (user.Role == "Admin")
-                return RedirectToAction("Index", "Home", new { area = "Admin" });
-            else
-                return RedirectToAction("Index", "Home", new { area = "Customer" });
+            return user.Role == "Admin"
+                ? RedirectToAction("Index", "Home", new { area = "Admin" })
+                : RedirectToAction("Index", "Home", new { area = "Customer" });
         }
     }
 }
