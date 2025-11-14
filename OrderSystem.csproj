@@ -9,9 +9,9 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Data.Tables" Version="12.11.0" />
-    <PackageReference Include="Azure.Storage.Blobs" Version="12.25.0" />
-    <PackageReference Include="Azure.Storage.Files.Shares" Version="12.23.0" />
-    <PackageReference Include="Azure.Storage.Queues" Version="12.23.0" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.26.0" />
+    <PackageReference Include="Azure.Storage.Files.Shares" Version="12.24.0" />
+    <PackageReference Include="Azure.Storage.Queues" Version="12.24.0" />
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.53.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.11">
@@ -19,6 +19,15 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OrderSystem.Services.Shared\OrderSystem.Services.Shared.csproj" />
+    <ProjectReference Include="..\OrderSystem.Services\OrderSystem.Services.csproj" />
   </ItemGroup>
 
 </Project>

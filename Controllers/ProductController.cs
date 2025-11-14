@@ -52,7 +52,15 @@ namespace OrderSystem.Controllers
             // Upload product image if provided
             if (productImage != null && productImage.Length > 0)
             {
-                product.ProductImage = await _blobService.UploadFileAsync(productImage, "product-images");
+                using var ms = new MemoryStream();
+                await productImage.CopyToAsync(ms);
+
+                product.ProductImage = await _blobService.UploadFileAsync(
+                    productImage.FileName,
+                    ms.ToArray(),
+                    "product-images"
+                );
+
             }
 
             // Add product to Table Storage
@@ -87,7 +95,15 @@ namespace OrderSystem.Controllers
                 // Upload new image if selected
                 if (productImage != null && productImage.Length > 0)
                 {
-                    product.ProductImage = await _blobService.UploadFileAsync(productImage, "product-images");
+                    using var ms = new MemoryStream();
+                    await productImage.CopyToAsync(ms);
+
+                    product.ProductImage = await _blobService.UploadFileAsync(
+                        productImage.FileName,
+                        ms.ToArray(),
+                        "product-images"
+                    );
+
                 }
 
                 // Update product in Table Storage (ETag.All avoids ETag issues)

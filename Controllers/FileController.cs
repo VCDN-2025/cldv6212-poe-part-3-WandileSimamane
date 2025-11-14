@@ -28,7 +28,15 @@ namespace OrderSystem.Controllers
         {
             if (file != null && file.Length > 0)
             {
-                await _fileService.UploadFileAsync(file, "contracts");
+                using var ms = new MemoryStream();
+                await file.CopyToAsync(ms);
+
+                await _fileService.UploadFileAsync(
+                    file.FileName,
+                    ms.ToArray(),
+                    "contracts"
+                );
+
                 ViewBag.Message = "File uploaded successfully!";
             }
             else

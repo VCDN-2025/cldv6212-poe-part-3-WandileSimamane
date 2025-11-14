@@ -38,10 +38,10 @@ namespace OrderSystem.Controllers
             var enrichedItems = new List<CartItem>();
             foreach (var item in cartItems)
             {
-                var product = await _cartService.GetProductByIdAsync(item.ProductId); // you'll need to add this to CartService
+                var product = await _cartService.GetProductByIdAsync(item.ProductId); 
                 if (product != null)
                 {
-                    item.ProductName = product.Name;
+                    item.ProductName = product.ProductName;
                     item.Price = product.Price;
                     enrichedItems.Add(item);
                 }

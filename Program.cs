@@ -1,64 +1,63 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿// Program.cs (MVC Web app)
+using Azure.Storage.Blobs;
+using Azure.Storage.Files.Shares;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OrderSystem.Services;
 
-namespace OrderSystem
+var builder = WebApplication.CreateBuilder(args);
+
+// MVC
+builder.Services.AddControllersWithViews();
+
+// Session
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
 {
-    public interface IQueueService
-    {
-        void SendMessage(string queueName, string message);
-    }
+    options.IdleTimeout = TimeSpan.FromHours(2);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+// --- Register Azure SDK clients using the same connection string ---
+// Use the storage connection string you already have in appsettings.json:
+// "AzureWebJobsStorage" or dedicated keys like "AzureBlobStorage"
+string storageConnection = builder.Configuration.GetConnectionString("AzureTableStorage")
+// fallback to AzureWebJobsStorage if you prefer
+?? builder.Configuration["AzureWebJobsStorage"]
+?? throw new InvalidOperationException("Azure storage connection string not found.");
 
-            // ---------------------------
-            // Add services to DI container
-            // ---------------------------
-            builder.Services.AddControllersWithViews();
+// Blob and File clients
+builder.Services.AddSingleton(new BlobServiceClient(storageConnection));
+builder.Services.AddSingleton(new ShareServiceClient(storageConnection));
 
-            // Session setup
-            builder.Services.AddDistributedMemoryCache();
-            builder.Services.AddSession(options =>
-            {
-                options.IdleTimeout = TimeSpan.FromHours(2);
-                options.Cookie.HttpOnly = true;
-                options.Cookie.IsEssential = true;
-            });
+// Register your services which accept SDK clients or IConfiguration
+builder.Services.AddSingleton<TableService>();           // TableService accepts IConfiguration in this rewrite
+builder.Services.AddScoped<CartService>();              // scoped OK for web requests
+builder.Services.AddSingleton<BlobService>();           // BlobService accepts BlobServiceClient
+builder.Services.AddSingleton<FileService>();           // FileService accepts ShareServiceClient
+builder.Services.AddSingleton<QueueService>();          // QueueService accepts IConfiguration
 
+var app = builder.Build();
 
-            builder.Services.AddSingleton<TableService>(x => new TableService(builder.Configuration));
-            builder.Services.AddScoped<CartService>(); 
-            builder.Services.AddSingleton<BlobService>(x => new BlobService(builder.Configuration));
-            builder.Services.AddSingleton<QueueService>(x => new QueueService(builder.Configuration));
-            builder.Services.AddSingleton<FileService>(x => new FileService(builder.Configuration));
-
-            var app = builder.Build();
-
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Home/Error");
-                app.UseHsts();
-            }
-
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-
-            app.UseRouting();
-
-            app.UseSession();
-            app.UseAuthorization();
-
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
-
-            app.Run();
-        }
-    }
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseSession();
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();
