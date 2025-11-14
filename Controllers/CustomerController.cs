@@ -105,5 +105,10 @@ namespace OrderSystem.Controllers
             await _tableService.DeleteCustomerAsync(id);
             return RedirectToAction(nameof(Index));
         }
+        public async Task<IActionResult> Shop()
+        {
+            var products = await _tableService.GetAllProductsAsync();
+            return View(products);
+        }
     }
 }

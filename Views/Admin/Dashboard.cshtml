@@ -1,0 +1,48 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">Admin Dashboard</h1>
+        <p class="text-muted">Manage Products, Customers, and Orders</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <!-- Products -->
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100 text-center border-0">
+                <div class="card-body">
+                    <i class="bi bi-box-seam display-3 text-primary mb-3"></i>
+                    <h4 class="card-title fw-bold">Products</h4>
+                    <p class="text-muted">Manage product catalog</p>
+                    <a asp-controller="Product" asp-action="Index" class="btn btn-primary">Go to Products</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customers -->
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100 text-center border-0">
+                <div class="card-body">
+                    <i class="bi bi-people-fill display-3 text-success mb-3"></i>
+                    <h4 class="card-title fw-bold">Customers</h4>
+                    <p class="text-muted">Manage customer records</p>
+                    <a asp-controller="Customer" asp-action="Index" class="btn btn-success">Go to Customers</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders -->
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100 text-center border-0">
+                <div class="card-body">
+                    <i class="bi bi-receipt-cutoff display-3 text-warning mb-3"></i>
+                    <h4 class="card-title fw-bold">Orders</h4>
+                    <p class="text-muted">Track customer orders</p>
+                    <a asp-controller="Order" asp-action="Index" class="btn btn-warning text-white">Go to Orders</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

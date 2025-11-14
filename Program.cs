@@ -1,4 +1,4 @@
-﻿// Program.cs (MVC Web app)
+﻿
 using Azure.Storage.Blobs;
 using Azure.Storage.Files.Shares;
 using Microsoft.AspNetCore.Builder;
@@ -20,12 +20,8 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
-
-// --- Register Azure SDK clients using the same connection string ---
-// Use the storage connection string you already have in appsettings.json:
-// "AzureWebJobsStorage" or dedicated keys like "AzureBlobStorage"
 string storageConnection = builder.Configuration.GetConnectionString("AzureTableStorage")
-// fallback to AzureWebJobsStorage if you prefer
+
 ?? builder.Configuration["AzureWebJobsStorage"]
 ?? throw new InvalidOperationException("Azure storage connection string not found.");
 
@@ -33,12 +29,19 @@ string storageConnection = builder.Configuration.GetConnectionString("AzureTable
 builder.Services.AddSingleton(new BlobServiceClient(storageConnection));
 builder.Services.AddSingleton(new ShareServiceClient(storageConnection));
 
-// Register your services which accept SDK clients or IConfiguration
-builder.Services.AddSingleton<TableService>();           // TableService accepts IConfiguration in this rewrite
-builder.Services.AddScoped<CartService>();              // scoped OK for web requests
-builder.Services.AddSingleton<BlobService>();           // BlobService accepts BlobServiceClient
-builder.Services.AddSingleton<FileService>();           // FileService accepts ShareServiceClient
-builder.Services.AddSingleton<QueueService>();          // QueueService accepts IConfiguration
+builder.Services.AddSingleton<TableService>();          
+builder.Services.AddScoped<CartService>();          
+builder.Services.AddSingleton<BlobService>();         
+builder.Services.AddSingleton<FileService>();       
+builder.Services.AddSingleton<QueueService>();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(60);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
@@ -59,5 +62,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.UseSession();
 
 app.Run();
