@@ -1,7 +1,10 @@
 ﻿using Azure;
 using Azure.Data.Tables;
+using Microsoft.Extensions.Configuration;
 using OrderSystem.Models;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace OrderSystem.Services
@@ -10,190 +13,174 @@ namespace OrderSystem.Services
     {
         private readonly string _connectionString;
 
-        // Initializes TableService with Azure Table Storage connection string
         public TableService(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("AzureTableStorage");
 
             if (string.IsNullOrEmpty(_connectionString))
-            {
                 throw new InvalidOperationException("Azure Table Storage connection string is not configured.");
-            }
         }
 
-        // ----------------- Customer Methods -----------------
-
-        // Retrieves a single customer by ID
-        public async Task<Customer> GetCustomerAsync(string customerId)
+        // Customer 
+        public async Task<Customer> GetCustomerAsync(string id)
         {
-            var tableClient = new TableClient(_connectionString, "Customer");
-            try
-            {
-                var customer = await tableClient.GetEntityAsync<Customer>("Customer", customerId);
-                return customer.Value;
-            }
-            catch (Azure.RequestFailedException)
-            {
-                return null;
-            }
+            var client = new TableClient(_connectionString, "Customer");
+            try { return (await client.GetEntityAsync<Customer>("Customer", id)).Value; }
+            catch { return null; }
         }
 
-        // Retrieves all customers
         public async Task<List<Customer>> GetAllCustomersAsync()
         {
-            var tableClient = GetCustomerTableClient();
-            var customers = new List<Customer>();
-            await foreach (var customer in tableClient.QueryAsync<Customer>())
-            {
-                customers.Add(customer);
-            }
-            return customers;
+            var client = new TableClient(_connectionString, "Customer");
+            var list = new List<Customer>();
+            await foreach (var c in client.QueryAsync<Customer>()) list.Add(c);
+            return list;
         }
 
-        // Adds a new customer
         public async Task AddCustomerAsync(Customer customer)
         {
-            var tableClient = new TableClient(_connectionString, "Customer");
-            await tableClient.AddEntityAsync(customer);
+            var client = new TableClient(_connectionString, "Customer");
+            await client.CreateIfNotExistsAsync();
+            await client.AddEntityAsync(customer);
         }
 
-        // Updates an existing customer
         public async Task UpdateCustomerAsync(Customer customer)
         {
-            var tableClient = new TableClient(_connectionString, "Customer");
-            await tableClient.UpdateEntityAsync(customer, ETag.All, TableUpdateMode.Replace);
+            var client = new TableClient(_connectionString, "Customer");
+            await client.UpdateEntityAsync(customer, ETag.All, TableUpdateMode.Replace);
         }
 
-        // Deletes a customer by ID
-        public async Task DeleteCustomerAsync(string customerId)
+        public async Task DeleteCustomerAsync(string id)
         {
-            var tableClient = new TableClient(_connectionString, "Customer");
-            await tableClient.DeleteEntityAsync("Customer", customerId);
+            var client = new TableClient(_connectionString, "Customer");
+            await client.DeleteEntityAsync("Customer", id);
         }
 
-        // Ensures the Customer table exists and returns its client
-        private TableClient GetCustomerTableClient()
+        // Product 
+        public async Task<Product> GetProductAsync(string id)
         {
-            var tableClient = new TableClient(_connectionString, "Customer");
-            tableClient.CreateIfNotExists();
-            return tableClient;
+            var client = new TableClient(_connectionString, "Product");
+            try { return (await client.GetEntityAsync<Product>("Product", id)).Value; }
+            catch { return null; }
         }
 
-        // ----------------- Product Methods -----------------
-
-        // Retrieves a single product by ID
-        public async Task<Product> GetProductAsync(string productId)
-        {
-            var tableClient = new TableClient(_connectionString, "Product");
-            try
-            {
-                var product = await tableClient.GetEntityAsync<Product>("Product", productId);
-                return product.Value;
-            }
-            catch (Azure.RequestFailedException)
-            {
-                return null;
-            }
-        }
-
-        // Retrieves all products
         public async Task<List<Product>> GetAllProductsAsync()
         {
-            var tableClient = GetProductTableClient();
-            var products = new List<Product>();
-            await foreach (var product in tableClient.QueryAsync<Product>())
-            {
-                products.Add(product);
-            }
-            return products;
+            var client = new TableClient(_connectionString, "Product");
+            var list = new List<Product>();
+            await foreach (var p in client.QueryAsync<Product>()) list.Add(p);
+            return list;
         }
 
-        // Ensures the Product table exists and returns its client
-        private TableClient GetProductTableClient()
-        {
-            var tableClient = new TableClient(_connectionString, "Product");
-            tableClient.CreateIfNotExists();
-            return tableClient;
-        }
-
-        // Adds a new product
         public async Task AddProductAsync(Product product)
         {
-            var tableClient = new TableClient(_connectionString, "Product");
-            await tableClient.AddEntityAsync(product);
+            var client = new TableClient(_connectionString, "Product");
+            await client.CreateIfNotExistsAsync();
+            await client.AddEntityAsync(product);
         }
 
-        // Updates an existing product
         public async Task UpdateProductAsync(Product product)
         {
-            var tableClient = new TableClient(_connectionString, "Product");
-            await tableClient.UpdateEntityAsync(product, ETag.All, TableUpdateMode.Replace);
+            var client = new TableClient(_connectionString, "Product");
+            await client.UpdateEntityAsync(product, ETag.All, TableUpdateMode.Replace);
         }
 
-        // Deletes a product by ID
-        public async Task DeleteProductAsync(string productId)
+        public async Task DeleteProductAsync(string id)
         {
-            var tableClient = new TableClient(_connectionString, "Product");
-            await tableClient.DeleteEntityAsync("Product", productId);
+            var client = new TableClient(_connectionString, "Product");
+            await client.DeleteEntityAsync("Product", id);
         }
 
-        // ----------------- Order Methods -----------------
-
-        // Retrieves a single order by ID
-        public async Task<Order> GetOrderAsync(string orderId)
+        // Cart & Cart Items 
+        public async Task<CartEntity> GetCartAsync(string userId)
         {
-            var tableClient = new TableClient(_connectionString, "Order");
-            try
-            {
-                var order = await tableClient.GetEntityAsync<Order>("Order", orderId);
-                return order.Value;
-            }
-            catch (Azure.RequestFailedException)
-            {
-                return null;
-            }
+            var client = new TableClient(_connectionString, "Cart");
+            await client.CreateIfNotExistsAsync();
+
+            await foreach (var c in client.QueryAsync<CartEntity>(x => x.UserId == userId))
+                return c;
+
+            var newCart = new CartEntity { UserId = userId, PartitionKey = "Cart", RowKey = Guid.NewGuid().ToString() };
+            await client.AddEntityAsync(newCart);
+            return newCart;
         }
 
-        // Retrieves all orders
-        public async Task<List<Order>> GetAllOrdersAsync()
+        public async Task<List<CartItem>> GetCartItemsAsync(string cartId)
         {
-            var tableClient = GetOrderTableClient();
-            var orders = new List<Order>();
-            await foreach (var order in tableClient.QueryAsync<Order>())
-            {
-                orders.Add(order);
-            }
-            return orders;
+            var client = new TableClient(_connectionString, "CartItem");
+            await client.CreateIfNotExistsAsync();
+
+            var list = new List<CartItem>();
+            await foreach (var item in client.QueryAsync<CartItem>(x => x.PartitionKey == cartId))
+                list.Add(item);
+
+            return list;
         }
 
-        // Adds a new order
+        public async Task<List<CartItem>> GetAllCartItemsAsync()
+        {
+            var client = new TableClient(_connectionString, "CartItem");
+            var items = new List<CartItem>();
+            await foreach (var item in client.QueryAsync<CartItem>())
+                items.Add(item);
+            return items;
+        }
+
+        public async Task AddCartItemAsync(CartItem item)
+        {
+            var client = new TableClient(_connectionString, "CartItem");
+            await client.CreateIfNotExistsAsync();
+            await client.AddEntityAsync(item);
+        }
+
+        public async Task UpdateCartItemAsync(CartItem item)
+        {
+            var client = new TableClient(_connectionString, "CartItem");
+            await client.UpdateEntityAsync(item, ETag.All, TableUpdateMode.Replace);
+        }
+
+        public async Task DeleteCartItemAsync(string cartId, string cartItemId)
+        {
+            var client = new TableClient(_connectionString, "CartItem");
+            await client.DeleteEntityAsync(cartId, cartItemId);
+        }
+
+        //  Checkout: Convert Cart to Order 
+        public async Task<string> ConvertCartToOrderAsync(string userId)
+        {
+            var cart = await GetCartAsync(userId);
+            var items = await GetCartItemsAsync(cart.RowKey);
+
+            if (!items.Any())
+                throw new InvalidOperationException("Cart is empty.");
+
+            var orderTable = new TableClient(_connectionString, "Order");
+            await orderTable.CreateIfNotExistsAsync();
+
+            var orderId = Guid.NewGuid().ToString();
+            var order = new Order
+            {
+                PartitionKey = "Order",
+                RowKey = orderId,
+                CustomerId = userId,
+                ProductId = string.Join(",", items.Select(i => $"{i.ProductId}x{i.Quantity}")),
+                OrderDate = DateTimeOffset.UtcNow
+            };
+
+            await orderTable.AddEntityAsync(order);
+
+            foreach (var i in items)
+                await DeleteCartItemAsync(cart.RowKey, i.RowKey);
+
+            return orderId;
+        }
+
+        //  Orders 
         public async Task AddOrderAsync(Order order)
         {
-            var tableClient = new TableClient(_connectionString, "Order");
-            await tableClient.CreateIfNotExistsAsync();
-            await tableClient.AddEntityAsync(order);
-        }
-
-        // Updates an existing order
-        public async Task UpdateOrderAsync(Order order)
-        {
-            var tableClient = new TableClient(_connectionString, "Order");
-            await tableClient.UpdateEntityAsync(order, ETag.All, TableUpdateMode.Replace);
-        }
-
-        // Deletes an order by ID
-        public async Task DeleteOrderAsync(string orderId)
-        {
-            var tableClient = new TableClient(_connectionString, "Order");
-            await tableClient.DeleteEntityAsync("Order", orderId);
-        }
-
-        // Ensures the Order table exists and returns its client
-        private TableClient GetOrderTableClient()
-        {
-            var tableClient = new TableClient(_connectionString, "Order");
-            tableClient.CreateIfNotExists();
-            return tableClient;
+            var client = new TableClient(_connectionString, "Order");
+            await client.CreateIfNotExistsAsync();
+            await client.AddEntityAsync(order);
         }
     }
 }

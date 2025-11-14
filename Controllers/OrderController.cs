@@ -1,126 +1,92 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using OrderSystem.Models;
 using OrderSystem.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OrderSystem.Controllers
 {
     public class OrderController : Controller
     {
         private readonly TableService _tableService;
-        private readonly QueueService _queueService;
 
-        // Initializes the controller with TableService and QueueService dependencies
-        public OrderController(TableService tableService, QueueService queueService)
+        public OrderController(TableService tableService)
         {
             _tableService = tableService;
-            _queueService = queueService;
         }
-
-        // Displays a list of all orders
         public async Task<IActionResult> Index()
         {
-            var orders = await _tableService.GetAllOrdersAsync();
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId))
+                return RedirectToAction("Login", "Account");
+
+            var orders = await GetOrdersForUser(userId);
             return View(orders);
         }
 
-        // Displays details for a single order
         public async Task<IActionResult> Details(string id)
         {
             if (string.IsNullOrEmpty(id))
-                return NotFound();
+                return BadRequest("Order ID is required.");
 
-            var order = await _tableService.GetOrderAsync(id);
+            var order = await GetOrderById(id);
             if (order == null)
-                return NotFound();
+                return NotFound("Order not found.");
 
+            var items = order.ProductId.Split(',')
+                        .Select(p =>
+                        {
+                            var parts = p.Split('x');
+                            return new
+                            {
+                                ProductId = parts[0],
+                                Quantity = int.Parse(parts[1])
+                            };
+                        })
+                        .ToList();
+
+            ViewBag.OrderItems = items;
             return View(order);
         }
 
-        // Shows the create order form
-        public IActionResult Create()
+
+        private async Task<List<Order>> GetOrdersForUser(string userId)
         {
-            return View();
+            var client = new Azure.Data.Tables.TableClient(
+                _tableService.GetType()
+                    .GetProperty("_connectionString", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    .GetValue(_tableService).ToString(),
+                "Order"
+            );
+
+            var list = new List<Order>();
+            await foreach (var order in client.QueryAsync<Order>(o => o.CustomerId == userId))
+                list.Add(order);
+
+            return list;
         }
 
-        // Handles creating a new order and sending a message to the queue
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Order order)
+       
+        private async Task<Order> GetOrderById(string orderId)
         {
-            if (ModelState.IsValid)
+            var client = new Azure.Data.Tables.TableClient(
+                _tableService.GetType()
+                    .GetProperty("_connectionString", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    .GetValue(_tableService).ToString(),
+                "Order"
+            );
+
+            try
             {
-                // Set the OrderDate to the current UTC time
-                order.OrderDate = DateTime.UtcNow;
-
-                // Add order to Table Storage
-                await _tableService.AddOrderAsync(order);
-
-                // Send message to queue for further processing
-                var message = $"Processing new order with ID: {order.RowKey}";
-                await _queueService.SendMessageAsync("order-processing", message);
-
-                return RedirectToAction(nameof(Index));
+                var response = await client.GetEntityAsync<Order>("Order", orderId);
+                return response.Value;
             }
-
-            return View(order);
-        }
-
-        // Shows the edit order form
-        public async Task<IActionResult> Edit(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-                return NotFound();
-
-            var order = await _tableService.GetOrderAsync(id);
-            if (order == null)
-                return NotFound();
-
-            return View(order);
-        }
-
-        // Handles updating an existing order
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, Order order)
-        {
-            if (id != order.RowKey)
-                return NotFound();
-
-            if (ModelState.IsValid)
+            catch
             {
-              
-                order.OrderDate = order.OrderDate.ToUniversalTime();
-
-                await _tableService.UpdateOrderAsync(order);
-                return RedirectToAction(nameof(Index));
+                return null;
             }
-
-            return View(order);
-        }
-
-
-        // Shows the delete confirmation page for an order
-        public async Task<IActionResult> Delete(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-                return NotFound();
-
-            var order = await _tableService.GetOrderAsync(id);
-            if (order == null)
-                return NotFound();
-
-            return View(order);
-        }
-
-        // Handles deletion of an order
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
-        {
-            await _tableService.DeleteOrderAsync(id);
-            return RedirectToAction(nameof(Index));
         }
     }
 }

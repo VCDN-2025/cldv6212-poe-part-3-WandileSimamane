@@ -1,9 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using OrderSystem.Services;
-using OrderSystem.Models;
-using Azure.Data.Tables;
-
 
 namespace OrderSystem
 {
@@ -18,18 +17,29 @@ namespace OrderSystem
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // ---------------------------
+            // Add services to DI container
+            // ---------------------------
             builder.Services.AddControllersWithViews();
 
-            // Registered The Services by passing the connection string from configuration.
-            builder.Services.AddSingleton(x => new TableService(builder.Configuration));
-            builder.Services.AddSingleton(x => new BlobService(builder.Configuration));
-            builder.Services.AddSingleton(x => new QueueService(builder.Configuration));
-            builder.Services.AddSingleton(x => new FileService(builder.Configuration));
+            // Session setup
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromHours(2);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
+
+            builder.Services.AddSingleton<TableService>(x => new TableService(builder.Configuration));
+            builder.Services.AddScoped<CartService>(); 
+            builder.Services.AddSingleton<BlobService>(x => new BlobService(builder.Configuration));
+            builder.Services.AddSingleton<QueueService>(x => new QueueService(builder.Configuration));
+            builder.Services.AddSingleton<FileService>(x => new FileService(builder.Configuration));
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -38,7 +48,10 @@ namespace OrderSystem
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
             app.UseRouting();
+
+            app.UseSession();
             app.UseAuthorization();
 
             app.MapControllerRoute(

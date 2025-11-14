@@ -1,31 +1,38 @@
 ﻿@model OrderSystem.Models.Order
-
 @{
     ViewData["Title"] = "Order Details";
+    var items = ViewBag.OrderItems as List<dynamic>;
 }
 
-<div class="container py-4">
-    <div class="card shadow-sm">
-        <div class="card-header bg-success text-white">
-            <h4 class="mb-0"><i class="bi bi-receipt"></i> Order Details</h4>
-        </div>
-        <div class="card-body">
-            <dl class="row">
-                <dt class="col-sm-3 fw-bold">@Html.DisplayNameFor(model => model.ProductId)</dt>
-                <dd class="col-sm-9">@Html.DisplayFor(model => model.ProductId)</dd>
+<h2>Order Details</h2>
 
-                <dt class="col-sm-3 fw-bold">@Html.DisplayNameFor(model => model.CustomerId)</dt>
-                <dd class="col-sm-9">@Html.DisplayFor(model => model.CustomerId)</dd>
-            </dl>
+<p><strong>Order ID:</strong> @Model.RowKey</p>
+<p><strong>Order Date:</strong> @Model.OrderDate.LocalDateTime.ToString("dd/MM/yyyy HH:mm")</p>
 
-            <div class="mt-3">
-                <a asp-action="Edit" asp-route-id="@Model?.RowKey" class="btn btn-warning">
-                    <i class="bi bi-pencil-square"></i> Edit
-                </a>
-                <a asp-action="Index" class="btn btn-secondary ms-2">
-                    <i class="bi bi-arrow-left-circle"></i> Back to List
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+<h3>Products</h3>
+@if (items == null || !items.Any())
+{
+    <p>No products found in this order.</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in items)
+            {
+                <tr>
+                    <td>@item.ProductId</td>
+                    <td>@item.Quantity</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-action="Index" class="btn btn-secondary">Back to Orders</a>

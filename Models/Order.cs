@@ -1,23 +1,23 @@
-﻿using System;
-using Azure;
+﻿using Azure;
 using Azure.Data.Tables;
-using System.ComponentModel.DataAnnotations;
+using System;
 
 namespace OrderSystem.Models
 {
     public class Order : ITableEntity
     {
         public string PartitionKey { get; set; } = "Order";
-        public string RowKey { get; set; } = Guid.NewGuid().ToString();
+        public string RowKey { get; set; } = Guid.NewGuid().ToString(); 
 
-        public int ProductId { get; set; }
-        public int CustomerId { get; set; }
-        public int Quantity { get; set; }
-
-        [Required]
+        public string CustomerId { get; set; } 
         public DateTimeOffset OrderDate { get; set; } = DateTimeOffset.UtcNow;
+
+        public string Status { get; set; } = "Pending";
+        public double? Total { get; set; }
 
         public DateTimeOffset? Timestamp { get; set; }
         public ETag ETag { get; set; }
+        public string ProductId { get; internal set; }
+        public int Quantity { get; internal set; }
     }
 }

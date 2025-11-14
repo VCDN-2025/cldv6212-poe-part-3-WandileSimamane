@@ -22,5 +22,7 @@ namespace OrderSystem.Models
 
         [IgnoreDataMember]
         public ETag ETag { get; set; }
+        public decimal Price { get; internal set; }
+        public string Name { get; internal set; }
     }
 }
