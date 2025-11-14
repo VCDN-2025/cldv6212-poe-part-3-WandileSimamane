@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
+using OrderSystem.Services.Shared.Models;
 namespace OrderSystem.Controllers
 {
     public class AdminController : Controller

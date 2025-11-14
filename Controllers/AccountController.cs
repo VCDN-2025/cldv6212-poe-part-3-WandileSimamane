@@ -1,73 +1,70 @@
-﻿using BCrypt.Net;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.Scripting;
-using OrderSystem.Models;
-using OrderSystem.Services;
+﻿using Microsoft.AspNetCore.Mvc;
+using OrderSystem.Services.Shared.Models;
+using OrderSystem.Services.Services;
+using System.Threading.Tasks;
+using BCrypt.Net;
 
 namespace OrderSystem.Controllers
 {
     public class AccountController : Controller
     {
         private readonly TableService _tableService;
+
         public AccountController(TableService tableService)
         {
             _tableService = tableService;
         }
 
-        // Registration
-        public IActionResult Register() => View();
-
-        [HttpPost]
-        public async Task<IActionResult> Register(string username, string password)
+        // GET: /Account/Register
+        [HttpGet]
+        public IActionResult Register()
         {
-            var existing = await _tableService.GetUserByUsernameAsync(username);
-            if (existing != null)
-            {
-                ModelState.AddModelError("", "Username already exists.");
-                return View();
-            }
-
-            var user = new User
-            {
-                Username = username,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
-                Role = "Customer"
-            };
-
-            await _tableService.AddUserAsync(user);
-
-            HttpContext.Session.SetString("UserId", user.RowKey);
-            HttpContext.Session.SetString("Role", user.Role);
-
-            return RedirectToAction("Index", "Home");
+            return View();
         }
 
-        // Login
-        public IActionResult Login() => View();
-
+        // POST: /Account/Register
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(Login model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            model.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
+
+            await _tableService.AddLoginAsync(model); // this saves to Azure Table
+
+            return RedirectToAction("Login");
+        }
+
+
+        // GET: /Account/Login
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        // POST: /Account/Login
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string username, string password)
         {
-            var user = await _tableService.GetUserByUsernameAsync(username);
+            var user = await _tableService.GetLoginByUsernameAsync(username);
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
-                ModelState.AddModelError("", "Invalid credentials.");
+                ModelState.AddModelError("", "Invalid username or password.");
                 return View();
             }
 
+            // Set session
             HttpContext.Session.SetString("UserId", user.RowKey);
             HttpContext.Session.SetString("Role", user.Role);
 
             if (user.Role == "Admin")
-                return RedirectToAction("Dashboard", "Admin");
+                return RedirectToAction("Index", "Home", new { area = "Admin" });
             else
-                return RedirectToAction("Shop", "Customer");
-        }
-
-        public IActionResult Logout()
-        {
-            HttpContext.Session.Clear();
-            return RedirectToAction("Login");
+                return RedirectToAction("Index", "Home", new { area = "Customer" });
         }
     }
 }

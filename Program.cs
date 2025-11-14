@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OrderSystem.Services;
+using OrderSystem.Services.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

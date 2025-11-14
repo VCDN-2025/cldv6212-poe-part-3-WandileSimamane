@@ -1,60 +1,38 @@
 ﻿@{
-    ViewData["Title"] = "Home";
+    ViewData["Title"] = "Welcome";
 }
 
 <div class="container py-5">
     <div class="text-center mb-5">
         <h1 class="fw-bold">Welcome to ABC Retail</h1>
-        <p class="text-muted">Manage your Products, Customers, Orders, and Files easily</p>
+        <p class="text-muted">Select how you want to log in</p>
     </div>
 
     <div class="row g-4 justify-content-center">
-        <!-- Products -->
+
+        <!-- Admin Login -->
         <div class="col-md-3">
             <div class="card shadow-sm h-100 text-center border-0">
                 <div class="card-body">
-                    <i class="bi bi-box-seam display-3 text-primary mb-3"></i>
-                    <h4 class="card-title fw-bold">Products</h4>
-                    <p class="text-muted">Manage product catalog.</p>
-                    <a asp-controller="Product" asp-action="Index" class="btn btn-primary">Go to Products</a>
+                    <i class="bi bi-shield-lock display-3 text-primary mb-3"></i>
+                    <h4 class="card-title fw-bold">Admin</h4>
+                    <p class="text-muted">Access admin dashboard</p>
+                    <a asp-controller="Account" asp-action="Login" asp-route-role="Admin" class="btn btn-primary">Login as Admin</a>
                 </div>
             </div>
         </div>
 
-        <!-- Customers -->
+        <!-- Customer Login -->
         <div class="col-md-3">
             <div class="card shadow-sm h-100 text-center border-0">
                 <div class="card-body">
-                    <i class="bi bi-people-fill display-3 text-success mb-3"></i>
-                    <h4 class="card-title fw-bold">Customers</h4>
-                    <p class="text-muted">Manage customer records.</p>
-                    <a asp-controller="Customer" asp-action="Index" class="btn btn-success">Go to Customers</a>
+                    <i class="bi bi-person-circle display-3 text-success mb-3"></i>
+                    <h4 class="card-title fw-bold">Customer</h4>
+                    <p class="text-muted">Browse products and manage your cart</p>
+                    <a asp-controller="Account" asp-action="Login" asp-route-role="Customer" class="btn btn-success">Login as Customer</a>
                 </div>
             </div>
         </div>
 
-        <!-- Orders -->
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100 text-center border-0">
-                <div class="card-body">
-                    <i class="bi bi-receipt-cutoff display-3 text-warning mb-3"></i>
-                    <h4 class="card-title fw-bold">Orders</h4>
-                    <p class="text-muted">Track customer orders.</p>
-                    <a asp-controller="Order" asp-action="Index" class="btn btn-warning text-white">Go to Orders</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- File Share -->
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100 text-center border-0">
-                <div class="card-body">
-                    <i class="bi bi-folder-symlink display-3 text-info mb-3"></i>
-                    <h4 class="card-title fw-bold">File Share</h4>
-                    <p class="text-muted">Upload and manage contracts.</p>
-                    <a asp-controller="File" asp-action="index" class="btn btn-info text-white">Go to Files</a>
-                </div>
-            </div>
-        </div>
     </div>
 </div>

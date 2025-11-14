@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using OrderSystem.Models;
+using OrderSystem.Services.Shared.Models;
 
 namespace OrderSystem.Controllers
 {

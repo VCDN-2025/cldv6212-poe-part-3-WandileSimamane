@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OrderSystem.Models;
-using OrderSystem.Services;
+using OrderSystem.Services.Shared.Models;
+using OrderSystem.Services.Services;
 using System.Threading.Tasks;
 
 namespace OrderSystem.Controllers

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - OrderSystem</title>
+    <title>@ViewData["Title"] - ABC Retail</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/OrderSystem.styles.css" asp-append-version="true" />
@@ -20,40 +20,93 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+
+                        @if (Context.Session.GetString("UserRole") == "Admin")
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Product" asp-action="Index">Products</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Customer" asp-action="Index">Customers</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Order" asp-action="Index">Orders</a></li>
+                        }
+                        else if (Context.Session.GetString("UserRole") == "Customer")
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Product" asp-action="Index">Shop</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Cart" asp-action="ViewCart">Cart</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Order" asp-action="Index">My Orders</a></li>
+                        }
+                        <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Customer" asp-action="Index">Customer</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Order" asp-action="Index">Order</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Product</a>
-                        </li>
-                       
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="File" asp-action="Index">Files</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Cart" asp-action="ViewCart">Cart</a>
-                        </li>
+
+                        @* Admin-only links *@
+                        @if (Context.Session.GetString("UserRole") == "Admin")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Products</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Customer" asp-action="Index">Customers</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Order" asp-action="Index">Orders</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="File" asp-action="Index">Files</a>
+                            </li>
+                        }
+
+                        @* Customer only links *@
+                        @if (Context.Session.GetString("UserRole") == "Customer")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Shop Products</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Cart" asp-action="ViewCart">Cart</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Order" asp-action="Index">My Orders</a>
+                            </li>
+                        }
+
+                        @* Show login/logout depending on session *@
+                        @if (string.IsNullOrEmpty(Context.Session.GetString("Username")))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <span class="nav-link text-dark">Hello, @Context.Session.GetString("Username")</span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-muted mt-4">
         <div class="container">
-            &copy; 2025 - OrderSystem - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - ABC Retail - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
