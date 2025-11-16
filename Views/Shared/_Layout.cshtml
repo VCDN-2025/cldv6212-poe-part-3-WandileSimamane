@@ -20,7 +20,6 @@
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li>
 
-                        @* ADMIN MENU *@
                         @if (Context.Session.GetString("UserRole") == "Admin")
                         {
                             <li class="nav-item"><a class="nav-link" asp-controller="Product" asp-action="Index">Products</a></li>
@@ -28,7 +27,7 @@
                             <li class="nav-item"><a class="nav-link" asp-controller="Customer" asp-action="Index">Customers</a></li>
                         }
 
-                        @* CUSTOMER MENU *@
+                        
                         @if (Context.Session.GetString("UserRole") == "Customer")
                         {
                             <li class="nav-item"><a class="nav-link" asp-controller="Product" asp-action="Shop">Shop</a></li>
@@ -48,7 +47,7 @@
     </header>
 
     <div class="container mt-4">
-        @* Success / Error messages *@
+       
         @if (TempData["Success"] != null)
         {
             <div class="alert alert-success alert-dismissible fade show" role="alert">

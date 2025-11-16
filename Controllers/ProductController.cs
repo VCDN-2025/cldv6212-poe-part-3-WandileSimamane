@@ -55,7 +55,7 @@ namespace OrderSystem.Controllers
 
             try
             {
-                if (productImage?.Length > 0)  // ← nullable safe
+                if (productImage?.Length > 0) 
                 {
                     using var ms = new MemoryStream();
                     await productImage.CopyToAsync(ms);
