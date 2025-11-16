@@ -84,10 +84,10 @@ Configure Application Settings: Go to the App Service's "Configuration" settings
 Publish: Use the Publish wizard in Visual Studio to deploy the application directly to your new App Service.
 
 References
-Website ABC Retail Link: https://st10445696ordersystem.azurewebsites.net/
+Website ABC Retail Link: https://abcretailordersy-a4cfffbphmcmbcfu.southafricanorth-
+01.azurewebsites.net/
 
-YouTube Demo: https://www.youtube.com/watch?v=C8pHQhVYRsk
-
+YouTube Demo: https://www.youtube.com/watch?v=lzHLhpw9xUQ
 YouTube School Playlist for grtting started with Table Storage: https://www.youtube.com/playlist?list=PL480DYS-b_kcZiyuCyHolh6Nad8J_Xnk7
 
 Microsoft Learn: https://learn.microsoft.com/en-us/azure/storage/tables/
@@ -97,3 +97,7 @@ Blog Post on Azure tables: https://code-maze.com/azure-table-storage-aspnetcore/
 ChatGPT Chat for aid with creating clean comments: https://chatgpt.com/share/68b095af-96b8-8000-be5f-7bd8ca1ac440
 
 ChatGPT Chat for UI refining: https://chatgpt.com/share/68b095dc-fbe4-8000-ba79-5d2c0662aeb7
+
+NOTE: Resources were wiped on azure. Had to re-deploy only for them to be wiped of again.
+
+Functions and shared Services are included in the repo  in zipped files as i could not push them due to them being in the same solution
