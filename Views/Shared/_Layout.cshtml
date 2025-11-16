@@ -25,59 +25,40 @@
 
                         @if (Context.Session.GetString("UserRole") == "Admin")
                         {
-                            <li class="nav-item"><a class="nav-link" asp-controller="Product" asp-action="Index">Products</a></li>
-                            <li class="nav-item"><a class="nav-link" asp-controller="Customer" asp-action="Index">Customers</a></li>
-                            <li class="nav-item"><a class="nav-link" asp-controller="Order" asp-action="Index">Orders</a></li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Product" asp-action="Index">Products</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Customer" asp-action="Index">Customers</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Order" asp-action="Index">Orders</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="File" asp-action="Index">Files</a>
+                            </li>
                         }
                         else if (Context.Session.GetString("UserRole") == "Customer")
                         {
-                            <li class="nav-item"><a class="nav-link" asp-controller="Product" asp-action="Index">Shop</a></li>
-                            <li class="nav-item"><a class="nav-link" asp-controller="Cart" asp-action="ViewCart">Cart</a></li>
-                            <li class="nav-item"><a class="nav-link" asp-controller="Order" asp-action="Index">My Orders</a></li>
-                        }
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-
-                        @* Admin-only links *@
-                        @if (Context.Session.GetString("UserRole") == "Admin")
-                        {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Products</a>
+                                <a class="nav-link text-dark" asp-controller="Product" asp-action="Index">Shop Products</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Customer" asp-action="Index">Customers</a>
+                                <a class="nav-link text-dark" asp-controller="Cart" asp-action="ViewCart">Cart</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Order" asp-action="Index">Orders</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="File" asp-action="Index">Files</a>
+                                <a class="nav-link text-dark" asp-controller="Order" asp-action="Index">My Orders</a>
                             </li>
                         }
 
-                        @* Customer only links *@
-                        @if (Context.Session.GetString("UserRole") == "Customer")
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Shop Products</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Cart" asp-action="ViewCart">Cart</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Order" asp-action="Index">My Orders</a>
-                            </li>
-                        }
-
-                        @* Show login/logout depending on session *@
+                        @* Login/Logout links (at the end for better flow) *@
                         @if (string.IsNullOrEmpty(Context.Session.GetString("Username")))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
                             </li>
                         }
                         else
@@ -86,7 +67,7 @@
                                 <span class="nav-link text-dark">Hello, @Context.Session.GetString("Username")</span>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Logout">Logout</a>
                             </li>
                         }
                     </ul>
