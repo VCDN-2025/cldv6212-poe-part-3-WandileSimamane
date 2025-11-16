@@ -60,7 +60,7 @@ using (var scope = app.Services.CreateScope())
     var container = blobService._client.GetBlobContainerClient("product-images");
     await container.CreateIfNotExistsAsync(Azure.Storage.Blobs.Models.PublicAccessType.Blob);
 
- 
+ // 
     var logins = await tableService.GetAllLoginsAsync(); 
     foreach (var login in logins.Where(l => l.Role == "Customer"))
     {
