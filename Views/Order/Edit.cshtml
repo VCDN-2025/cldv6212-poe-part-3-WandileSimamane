@@ -1,46 +1,80 @@
 ﻿@using OrderSystem.Services.Shared.Models
 @model Order
-
 @{
     ViewData["Title"] = "Edit Order";
 }
-
 <div class="container py-4">
-    <div class="card shadow-sm">
-        <div class="card-header bg-warning text-white">
-            <h4 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Order</h4>
-        </div>
-        <div class="card-body">
-            <form asp-action="Edit">
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                <input type="hidden" asp-for="RowKey" />
-                <input type="hidden" asp-for="PartitionKey" />
-
-                <div class="mb-3">
-                    <label asp-for="ProductId" class="form-label"></label>
-                    <input asp-for="ProductId" class="form-control" />
-                    <span asp-validation-for="ProductId" class="text-danger"></span>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Order #@Model.RowKey</h4>
                 </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="RowKey" />
+                        <input type="hidden" asp-for="PartitionKey" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                <div class="mb-3">
-                    <label asp-for="CustomerId" class="form-label"></label>
-                    <input asp-for="CustomerId" class="form-control" />
-                    <span asp-validation-for="CustomerId" class="text-danger"></span>
+                        <div class="mb-3">
+                            <label asp-for="CustomerEmail" class="form-label"></label>
+                            <input asp-for="CustomerEmail" class="form-control" />
+                            <span asp-validation-for="CustomerEmail" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Status" class="form-label"></label>
+                            <select asp-for="Status" class="form-select">
+                                <option value="Pending">Pending</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
+
+                        <!-- Read-only items preview -->
+                        <div class="mb-3">
+                            <label class="form-label">Items</label>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Qty</th>
+                                            <th>Price</th>
+                                            <th>Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.Items)
+                                        {
+                                            <tr>
+                                                <td>@item.ProductName</td>
+                                                <td>@item.Quantity</td>
+                                                <td>@item.Price.ToString("C")</td>
+                                                <td>@(item.Quantity* item.Price).ToString("C")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            Save Changes
+                        </button>
+
+                        <div class="mt-2 text-center">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
                 </div>
-
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-save"></i> Save
-                </button>
-                <a asp-action="Index" class="btn btn-secondary ms-2">
-                    <i class="bi bi-arrow-left-circle"></i> Back to List
-                </a>
-            </form>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <partial name="_ValidationScriptsPartial" />
 }

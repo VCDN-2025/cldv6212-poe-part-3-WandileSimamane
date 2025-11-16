@@ -9,106 +9,84 @@ namespace OrderSystem.Controllers
     {
         private readonly TableService _tableService;
 
-        // Initializes the controller with TableService dependency
         public CustomerController(TableService tableService)
         {
             _tableService = tableService;
         }
 
-        // Displays a list of all customers
+        // GET: /Customer
         public async Task<IActionResult> Index()
         {
+            if (HttpContext.Session.GetString("UserRole") != "Admin")
+                return Unauthorized();
+
             var customers = await _tableService.GetAllCustomersAsync();
             return View(customers);
         }
 
-        // Displays the details of a specific customer by ID
+        // GET: /Customer/Details/5
         public async Task<IActionResult> Details(string id)
         {
-            if (string.IsNullOrEmpty(id))
-                return NotFound();
+            if (HttpContext.Session.GetString("UserRole") != "Admin")
+                return Unauthorized();
 
+            if (string.IsNullOrEmpty(id)) return NotFound();
             var customer = await _tableService.GetCustomerAsync(id);
-            if (customer == null)
-                return NotFound();
-
+            if (customer == null) return NotFound();
             return View(customer);
         }
 
-        // Shows the form to create a new customer
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // Handles creating a new customer
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CustomerName,CustomerEmail")] Customer customer)
-        {
-            if (ModelState.IsValid)
-            {
-                await _tableService.AddCustomerAsync(customer);
-                return RedirectToAction(nameof(Index));
-            }
-            return View(customer);
-        }
-
-        // Shows the edit form for a customer
+        // GET: /Customer/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
-            if (string.IsNullOrEmpty(id))
-                return NotFound();
+            if (HttpContext.Session.GetString("UserRole") != "Admin")
+                return Unauthorized();
 
+            if (string.IsNullOrEmpty(id)) return NotFound();
             var customer = await _tableService.GetCustomerAsync(id);
-            if (customer == null)
-                return NotFound();
-
+            if (customer == null) return NotFound();
             return View(customer);
         }
 
-        // Handles updating an existing customer
+        // POST: /Customer/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("RowKey,PartitionKey,CustomerName,CustomerEmail,ETag")] Customer customer)
+        public async Task<IActionResult> Edit(string id, Customer customer)
         {
-            if (id != customer.RowKey)
-                return NotFound();
+            if (HttpContext.Session.GetString("UserRole") != "Admin")
+                return Unauthorized();
 
-            if (ModelState.IsValid)
-            {
-                await _tableService.UpdateCustomerAsync(customer);
-                return RedirectToAction(nameof(Index));
-            }
+            if (id != customer.RowKey) return NotFound();
+            if (!ModelState.IsValid) return View(customer);
 
-            return View(customer);
+            await _tableService.UpdateCustomerAsync(customer);
+            TempData["Success"] = "Customer updated.";
+            return RedirectToAction(nameof(Index));
         }
 
-        // Shows the delete confirmation page for a customer
+        // GET: /Customer/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
-            if (string.IsNullOrEmpty(id))
-                return NotFound();
+            if (HttpContext.Session.GetString("UserRole") != "Admin")
+                return Unauthorized();
 
+            if (string.IsNullOrEmpty(id)) return NotFound();
             var customer = await _tableService.GetCustomerAsync(id);
-            if (customer == null)
-                return NotFound();
-
+            if (customer == null) return NotFound();
             return View(customer);
         }
 
-        // Handles deletion of a customer
+        // POST: /Customer/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
+            if (HttpContext.Session.GetString("UserRole") != "Admin")
+                return Unauthorized();
+
             await _tableService.DeleteCustomerAsync(id);
+            TempData["Success"] = "Customer deleted.";
             return RedirectToAction(nameof(Index));
-        }
-        public async Task<IActionResult> Shop()
-        {
-            var products = await _tableService.GetAllProductsAsync();
-            return View(products);
         }
     }
 }

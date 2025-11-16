@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OrderSystem.Services.Shared.Models;
 using OrderSystem.Services.Services;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace OrderSystem.Controllers
@@ -14,66 +15,66 @@ namespace OrderSystem.Controllers
             _cartService = cartService;
         }
 
-        public async Task<IActionResult> AddToCart(string productId)
+        public async Task<IActionResult> AddItem(string productId, int quantity = 1)
         {
-            if (string.IsNullOrEmpty(productId))
-                return BadRequest("Invalid product ID.");
-
             var userId = HttpContext.Session.GetString("UserId");
-            if (string.IsNullOrEmpty(userId))
-                return RedirectToAction("Login", "Account");
+            if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Account");
 
-            await _cartService.AddItemAsync(userId, productId);
-            return RedirectToAction("ViewCart");
+            await _cartService.AddItemAsync(userId, productId, quantity); 
+            TempData["Success"] = "Added to cart.";
+            return RedirectToAction("Shop", "Product");
         }
+
+        // View Cart
         public async Task<IActionResult> ViewCart()
         {
             var userId = HttpContext.Session.GetString("UserId");
-            if (string.IsNullOrEmpty(userId))
-                return RedirectToAction("Login", "Account");
+            if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Account");
 
-            var cartItems = await _cartService.GetCartItemsAsync(userId);
+            var items = await _cartService.GetCartItemsAsync(userId);
+            return View(items);
+        }
 
-            
-            var enrichedItems = new List<CartItem>();
-            foreach (var item in cartItems)
+        // Update Quantities
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateCart(Dictionary<string, int> quantities)
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Account");
+
+            foreach (var kvp in quantities)
             {
-                var product = await _cartService.GetProductByIdAsync(item.ProductId); 
-                if (product != null)
-                {
-                    item.ProductName = product.ProductName;
-                    item.Price = product.Price;
-                    enrichedItems.Add(item);
-                }
+                if (kvp.Value <= 0)
+                    await _cartService.RemoveItemAsync(userId, kvp.Key);
+                else
+                    await _cartService.UpdateQuantityAsync(kvp.Key, kvp.Value);
             }
 
-            return View(enrichedItems);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UpdateQuantity(string cartItemId, int quantity)
-        {
-            if (quantity <= 0)
-                return BadRequest("Quantity must be greater than zero.");
-
-            await _cartService.UpdateQuantityAsync(cartItemId, quantity);
+            TempData["Success"] = "Cart updated.";
             return RedirectToAction("ViewCart");
         }
 
+        // Remove Item
         public async Task<IActionResult> RemoveItem(string cartItemId)
         {
-            await _cartService.RemoveItemAsync(cartItemId);
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Account");
+
+            await _cartService.RemoveItemAsync(userId, cartItemId);
+            TempData["Success"] = "Item removed.";
             return RedirectToAction("ViewCart");
         }
 
+        // Checkout
         public async Task<IActionResult> Checkout()
         {
             var userId = HttpContext.Session.GetString("UserId");
-            if (string.IsNullOrEmpty(userId))
-                return RedirectToAction("Login", "Account");
+            if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Account");
 
             var orderId = await _cartService.CheckoutAsync(userId);
-            return RedirectToAction("Details", "Order", new { id = orderId });
+            TempData["Success"] = $"Order placed! ID: {orderId}";
+            return RedirectToAction("Index", "Order");
         }
     }
 }

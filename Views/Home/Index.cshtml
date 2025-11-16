@@ -1,38 +1,78 @@
 ﻿@{
-    ViewData["Title"] = "Welcome";
+    ViewData["Title"] = "Home";
 }
-
-<div class="container py-5">
-    <div class="text-center mb-5">
-        <h1 class="fw-bold">Welcome to ABC Retail</h1>
-        <p class="text-muted">Select how you want to log in</p>
-    </div>
-
-    <div class="row g-4 justify-content-center">
-
-        <!-- Admin Login -->
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100 text-center border-0">
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0"><i class="bi bi-house-door"></i> Dashboard</h4>
+                </div>
                 <div class="card-body">
-                    <i class="bi bi-shield-lock display-3 text-primary mb-3"></i>
-                    <h4 class="card-title fw-bold">Admin</h4>
-                    <p class="text-muted">Access admin dashboard</p>
-                    <a asp-controller="Account" asp-action="Login" asp-route-role="Admin" class="btn btn-primary">Login as Admin</a>
+                    <div class="row g-4">
+                        @if (Context.Session.GetString("UserRole") == "Admin")
+                        {
+                            <div class="col-md-4">
+                                <div class="card text-center h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="bi bi-box-seam"></i> Manage Products</h5>
+                                        <a asp-controller="Product" asp-action="Index" class="btn btn-primary w-100">Go</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-center h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="bi bi-cart-check"></i> View Orders</h5>
+                                        <a asp-controller="Order" asp-action="Index" class="btn btn-primary w-100">Go</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-center h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="bi bi-people"></i> Manage Customers</h5>
+                                        <a asp-controller="Customer" asp-action="Index" class="btn btn-primary w-100">Go</a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else if (Context.Session.GetString("UserRole") == "Customer")
+                        {
+                            <div class="col-md-4">
+                                <div class="card text-center h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="bi bi-shop"></i> Shop Now</h5>
+                                        <a asp-controller="Product" asp-action="Shop" class="btn btn-success w-100">Browse</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-center h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="bi bi-cart"></i> My Cart</h5>
+                                        <a asp-controller="Cart" asp-action="ViewCart" class="btn btn-warning w-100">View</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-center h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="bi bi-receipt"></i> My Orders</h5>
+                                        <a asp-controller="Order" asp-action="MyOrders" class="btn btn-info w-100">View</a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-12 text-center py-5">
+                                <h3>Welcome! Please <a asp-controller="Account" asp-action="Login">login</a> or <a asp-controller="Account" asp-action="Register">register</a>.</h3>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Customer Login -->
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100 text-center border-0">
-                <div class="card-body">
-                    <i class="bi bi-person-circle display-3 text-success mb-3"></i>
-                    <h4 class="card-title fw-bold">Customer</h4>
-                    <p class="text-muted">Browse products and manage your cart</p>
-                    <a asp-controller="Account" asp-action="Login" asp-route-role="Customer" class="btn btn-success">Login as Customer</a>
-                </div>
-            </div>
-        </div>
-
     </div>
 </div>

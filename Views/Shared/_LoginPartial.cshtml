@@ -1,0 +1,14 @@
+﻿@if (Context.Session.GetString("UserId") == null)
+{
+    <a class="nav-link text-light" asp-controller="Account" asp-action="Login"><i class="bi bi-box-arrow-in-right"></i> Login</a>
+    <a class="nav-link text-light" asp-controller="Account" asp-action="Register"><i class="bi bi-person-plus"></i> Register</a>
+}
+else
+{
+    <span class="navbar-text text-light me-3">
+        <i class="bi bi-person-circle"></i> @Context.Session.GetString("UserEmail") (@Context.Session.GetString("UserRole"))
+    </span>
+    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+        <button type="submit" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-right"></i> Logout</button>
+    </form>
+}

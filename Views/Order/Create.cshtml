@@ -1,44 +1,68 @@
-﻿@using OrderSystem.Services.Shared.Models
-@model Order
-
+﻿@model OrderSystem.Services.Shared.Models.Order
 @{
-    ViewData["Title"] = "Create Order";
+    ViewData["Title"] = "Create Order (Admin)";
 }
-
 <div class="container py-4">
-    <div class="card shadow-sm">
-        <div class="card-header bg-success text-white">
-            <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Create Order</h4>
-        </div>
-        <div class="card-body">
-            <form asp-action="Create">
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                <div class="mb-3">
-                    <label asp-for="ProductId" class="form-label"></label>
-                    <input asp-for="ProductId" class="form-control" />
-                    <span asp-validation-for="ProductId" class="text-danger"></span>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="bi bi-cart-plus"></i> Create Manual Order</h4>
                 </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                <div class="mb-3">
-                    <label asp-for="CustomerId" class="form-label"></label>
-                    <input asp-for="CustomerId" class="form-control" />
-                    <span asp-validation-for="CustomerId" class="text-danger"></span>
+                        <div class="mb-3">
+                            <label class="form-label">Customer</label>
+                            <select name="CustomerId" class="form-select" required>
+                                <option value="">-- Select Customer --</option>
+                                @foreach (var cust in ViewBag.Customers)
+                                {
+                                    <option value="@cust.Value" selected="@(Model.CustomerId == cust.Value)">@cust.Text</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Products</label>
+                            <div id="productList">
+                                @foreach (var prod in ViewBag.Products)
+                                {
+                                    <div class="form-check mb-2">
+                                        <input type="checkbox" name="selectedProductIds" value="@prod.Value" class="form-check-input" id="prod-@prod.Value" />
+                                        <label class="form-check-label" for="prod-@prod.Value">@prod.Text</label>
+                                        <input type="number" name="quantities" value="0" min="0" class="form-control d-inline-block w-auto ms-3" style="width:80px;" />
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-save"></i> Create Order
+                        </button>
+
+                        <div class="mt-2 text-center">
+                            <a asp-action="Index" class="btn btn-secondary">Back to Orders</a>
+                        </div>
+                    </form>
                 </div>
-
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-save"></i> Create
-                </button>
-                <a asp-action="Index" class="btn btn-secondary ms-2">
-                    <i class="bi bi-arrow-left-circle"></i> Back to List
-                </a>
-            </form>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <script>
+        // Enable quantity only when checkbox is checked
+        document.querySelectorAll('input[name="selectedProductIds"]').forEach(cb => {
+            cb.addEventListener('change', function () {
+                const qty = this.closest('.form-check').querySelector('input[name="quantities"]');
+                qty.disabled = !this.checked;
+                if (!this.checked) qty.value = 0;
+            });
+        });
+    </script>
+    <partial name="_ValidationScriptsPartial" />
 }

@@ -1,42 +1,42 @@
 ﻿@model IEnumerable<OrderSystem.Services.Shared.Models.Customer>
-
 @{
-    ViewData["Title"] = "Customers";
+    ViewData["Title"] = "Manage Customers (Admin)";
 }
-
 <div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="fw-bold">@ViewData["Title"]</h2>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Create New
-        </a>
-    </div>
-
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>@Html.DisplayNameFor(model => model.CustomerName)</th>
-                        <th>@Html.DisplayNameFor(model => model.CustomerEmail)</th>
-                        <th class="text-center">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>@Html.DisplayFor(modelItem => item.CustomerName)</td>
-                            <td>@Html.DisplayFor(modelItem => item.CustomerEmail)</td>
-                            <td class="text-center">
-                                <a asp-action="Edit" asp-route-id="@item.RowKey" class="btn btn-sm btn-warning">Edit</a>
-                                <a asp-action="Details" asp-route-id="@item.RowKey" class="btn btn-sm btn-info text-white">Details</a>
-                                <a asp-action="Delete" asp-route-id="@item.RowKey" class="btn btn-sm btn-danger">Delete</a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="bi bi-people"></i> Customers</h4>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var c in Model)
+                                {
+                                    <tr>
+                                        <td>@c.CustomerName</td>
+                                        <td>@c.CustomerEmail</td>
+                                        <td class="text-center">
+                                            <a asp-action="Details" asp-route-id="@c.RowKey" class="btn btn-sm btn-info text-white me-1">Details</a>
+                                            <a asp-action="Edit" asp-route-id="@c.RowKey" class="btn btn-sm btn-warning me-1">Edit</a>
+                                            <a asp-action="Delete" asp-route-id="@c.RowKey" class="btn btn-sm btn-danger">Delete</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
