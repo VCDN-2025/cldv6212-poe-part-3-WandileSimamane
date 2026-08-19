@@ -1,103 +1,126 @@
-ABC Retail Order System
-Project Overview
-This is a web application for ABC Retail, an e-commerce platform that manages customer, product, and order information. The project demonstrates a modern, scalable, and cloud-native approach by leveraging various Azure Storage services as its back-end data persistence layer. This solution avoids a traditional relational database in favor of a more flexible and cost-effective NoSQL architecture.
+# ABC Retail — Order System
 
-Technology Stack
-Framework: ASP.NET Core MVC
+ABC Retail is a **cloud-native e-commerce web application** built on ASP.NET Core MVC. Instead of a traditional relational database, it uses **Azure Storage** as its entire back-end persistence layer — Tables, Blobs, Queues, and Files — to manage customers, products, and orders in a scalable, cost-effective, NoSQL-first architecture.
 
-Language: C#
+---
 
-Development Environment: Visual Studio
+## Overview
 
-Cloud Services: Azure Storage (Tables, Blobs, Queues, Files)
+The system demonstrates how a full e-commerce workflow can be built entirely on Azure Storage primitives rather than a conventional SQL database, pairing each storage service with the part of the domain it fits best: structured records in Tables, images in Blobs, async order processing via Queues, and document storage via File Shares.
 
-Front-end: Razor Views with HTML, CSS, and JavaScript (default ASP.NET Core template)
+---
 
-Key Features
-The application provides a complete set of features for managing the e-commerce system:
+## Features
 
-Customer Management: Full CRUD (Create, Read, Update, Delete) functionality for customer profiles.
+### Customer Management
+- Full **CRUD** functionality for customer profiles.
 
-Product Management: Full CRUD functionality for products, including image uploads.
+### Product Management
+- Full **CRUD** functionality for products, including **image uploads** stored in Blob Storage.
 
-Order Management: Full CRUD functionality for orders, with an integrated asynchronous messaging system.
+### Order Management
+- Full **CRUD** functionality for orders.
+- Integrated **asynchronous messaging**: every new order triggers a queue message, decoupling the web app from downstream order processing.
 
-File Uploads: A dedicated page for uploading documents, such as dummy contracts.
+### File Uploads
+- Dedicated page for uploading documents (e.g., dummy contracts) to Azure File Storage.
 
-Azure Storage Integration
-This project is built around the following Azure Storage services:
+---
 
-Azure Table Storage: Used as the primary NoSQL database to store Customer, Product, and Order data. It is highly scalable and optimized for large volumes of structured, non-relational data.
+## Tech Stack
 
-Azure Blob Storage: Used to store unstructured data, specifically the product images. The application saves the public URL of the image in the Product table and uses it to display the images on the website.
+| Category | Technology |
+| :--- | :--- |
+| **Framework** | ASP.NET Core MVC |
+| **Language** | C# |
+| **IDE** | Visual Studio |
+| **Cloud Services** | Azure Storage (Tables, Blobs, Queues, Files) |
+| **Frontend** | Razor Views + HTML/CSS/JavaScript |
 
-Azure Queue Storage: Implements an asynchronous messaging system. When a new order is created, a message is sent to a queue, decoupling the web application from the back-end order processing logic.
+---
 
-Azure File Storage: Serves as a cloud-based file share for storing documents, such as "dummy contracts."
+## Azure Storage Architecture
 
-Setup and Configuration
-To run this project, you need an Azure Storage Account and the corresponding connection strings.
+| Service | Role | Details |
+| :--- | :--- | :--- |
+| **Table Storage** | Primary NoSQL database | Stores Customer, Product, and Order records — scalable, structured, non-relational |
+| **Blob Storage** | Image storage | Stores product images; the public URL is saved in the Product table for display |
+| **Queue Storage** | Async messaging | New orders trigger a queue message, decoupling the app from order processing logic |
+| **File Storage** | Document storage | Cloud file share for documents such as dummy contracts |
 
-1. Azure Setup
-Create an Azure Storage Account: In the Azure Portal, create a new Storage Account. Ensure it has the following services enabled: Tables, Blobs, Queues, and Files.
+---
 
-Get Connection Strings: Navigate to your Storage Account in the portal, go to "Access keys," and copy your connection string. This single string provides access to all four services.
+## Getting Started
 
-Create Containers and Shares:
+### Prerequisites
+- An Azure account with permission to create a Storage Account
+- Visual Studio with ASP.NET Core workload installed
 
-Blob Container: Create a new blob container named product-images.
+### 1. Azure Setup
 
-File Share: Create a new file share named contracts.
+1. **Create a Storage Account** in the Azure Portal with **Tables**, **Blobs**, **Queues**, and **Files** enabled.
+2. **Get the connection string** — go to the Storage Account → *Access keys* → copy the connection string (one string covers all four services).
+3. **Create the required containers/shares**:
+   - Blob container: `product-images`
+   - File share: `contracts`
 
-2. Project Configuration
-Clone the Repository: Clone this project to your local machine.
+### 2. Project Configuration
 
-Add Connection Strings: Open the appsettings.json file and add your Azure Storage connection string under ConnectionStrings. You can use the same string for all four services if they are in the same storage account.
+1. **Clone the repository.**
+2. **Add connection strings** to `appsettings.json`:
+   ```json
+   "ConnectionStrings": {
+     "AzureTableStorage": "your_connection_string_here",
+     "AzureBlobStorage": "your_connection_string_here",
+     "AzureQueueStorage": "your_connection_string_here",
+     "AzureFileStorage": "your_connection_string_here"
+   }
+   ```
+   The same connection string can be reused across all four keys if the services share one storage account.
+3. **Restore NuGet packages** in Visual Studio. Key packages:
+   - `Azure.Data.Tables`
+   - `Azure.Storage.Blobs`
+   - `Azure.Storage.Queues`
+   - `Azure.Storage.Files.Shares`
 
-"ConnectionStrings": {
-  "AzureTableStorage": "your_connection_string_here",
-  "AzureBlobStorage": "your_connection_string_here",
-  "AzureQueueStorage": "your_connection_string_here",
-  "AzureFileStorage": "your_connection_string_here"
-}
+### 3. Run the Application
 
-Restore NuGet Packages: In Visual Studio, ensure all NuGet packages are restored. The key packages are:
+Press `F5` in Visual Studio. Tables and file shares are created automatically on first run.
 
-Azure.Data.Tables
+---
 
-Azure.Storage.Blobs
+## Deployment to Azure App Service
 
-Azure.Storage.Queues
+1. **Create an App Service** in the Azure Portal, configured for ASP.NET Core.
+2. **Configure application settings** — under the App Service's *Configuration* blade, add an application setting for each connection string in `appsettings.json`, using the same names and values.
+3. **Publish** directly from Visual Studio using the Publish wizard.
 
-Azure.Storage.Files.Shares
+---
 
-3. Running the Application
-After configuring the connection strings, you can run the application directly from Visual Studio by pressing F5. The application will automatically create the necessary tables and file shares when first accessed.
+## Live Demo
 
-Deployment to Azure App Service
-To deploy the application to a live environment:
+🌐 **Live Site**: [abcretailordersy...southafricanorth-01.azurewebsites.net](https://abcretailordersy-a4cfffbphmcmbcfu.southafricanorth-01.azurewebsites.net/)
 
-Create an App Service: In the Azure Portal, create a new Azure App Service and configure it for ASP.NET Core.
+📺 **YouTube Walkthrough**: [Watch the demo](https://www.youtube.com/watch?v=lzHLhpw9xUQ)
 
-Configure Application Settings: Go to the App Service's "Configuration" settings. For each connection string in your appsettings.json file, add a new "Application setting" with the same name and your connection string as the value. This ensures the deployed application can access your Azure services.
+> **Note**: Azure resources were wiped and had to be re-deployed — twice. If the live link is unavailable, this is likely why.
 
-Publish: Use the Publish wizard in Visual Studio to deploy the application directly to your new App Service.
+> **Note**: Azure Functions and shared Services are included in the repo as zipped files, since they could not be pushed while living in the same solution.
 
-References
-Website ABC Retail Link: https://abcretailordersy-a4cfffbphmcmbcfu.southafricanorth-
-01.azurewebsites.net/
+---
 
-YouTube Demo: https://www.youtube.com/watch?v=lzHLhpw9xUQ
-YouTube School Playlist for grtting started with Table Storage: https://www.youtube.com/playlist?list=PL480DYS-b_kcZiyuCyHolh6Nad8J_Xnk7
+## References
 
-Microsoft Learn: https://learn.microsoft.com/en-us/azure/storage/tables/
+| # | Source | Description | Link |
+| :--- | :--- | :--- | :--- |
+| 1 | YouTube — School Playlist | Getting started with Azure Table Storage | [Playlist](https://www.youtube.com/playlist?list=PL480DYS-b_kcZiyuCyHolh6Nad8J_Xnk7) |
+| 2 | Microsoft Learn | Azure Table Storage documentation | [Docs](https://learn.microsoft.com/en-us/azure/storage/tables/) |
+| 3 | Code Maze | Blog post on Azure Table Storage with ASP.NET Core | [Blog](https://code-maze.com/azure-table-storage-aspnetcore/) |
+| 4 | ChatGPT | Aid with writing clean code comments | [Chat](https://chatgpt.com/share/68b095af-96b8-8000-be5f-7bd8ca1ac440) |
+| 5 | ChatGPT | UI refinement assistance | [Chat](https://chatgpt.com/share/68b095dc-fbe4-8000-ba79-5d2c0662aeb7) |
 
-Blog Post on Azure tables: https://code-maze.com/azure-table-storage-aspnetcore/
+---
 
-ChatGPT Chat for aid with creating clean comments: https://chatgpt.com/share/68b095af-96b8-8000-be5f-7bd8ca1ac440
+## Author
 
-ChatGPT Chat for UI refining: https://chatgpt.com/share/68b095dc-fbe4-8000-ba79-5d2c0662aeb7
-
-NOTE: Resources were wiped on azure. Had to re-deploy only for them to be wiped of again.
-
-Functions and shared Services are included in the repo  in zipped files as i could not push them due to them being in the same solution
+**Wandile Simamane**
